@@ -43,7 +43,6 @@ def main():
 
     ##Debugging
     cashflows = generate_cashflow_schedule_gilts(maturity,coupon)
-    print(cashflows)                                               #Debugging
     accrued = calculate_accrued_actact(cashflows)
     yield_actact = calculate_yield_actact(cashflows, price, accrued, 2, 1000, 1e-5)
 

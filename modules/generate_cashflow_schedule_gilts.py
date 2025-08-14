@@ -34,7 +34,7 @@ def generate_cashflow_schedule_gilts(maturity_date: datetime, coupon: float) -> 
     cashflow_dates.sort()       #Dates in chronological order
 
     #Generate payment amounts
-    cashflows = [coupon/2]*len(cashflow_dates)
+    cashflows = [coupon/2]*len(cashflow_dates)          #All gilts are semi-annual
     if cashflows:
         cashflows[-1] += 100
 
