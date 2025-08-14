@@ -2,7 +2,10 @@
 #vibecoding with CoPilot
 
 from datetime import datetime
+
 from modules.generate_cashflow_schedule_gilts import generate_cashflow_schedule_gilts
+from modules.calculate_accrued_coupon import calculate_accrued_actact
+
 
 def validate_inputs(maturity_str: str, coupon_str: str, price_str: str):
     try:
@@ -37,9 +40,9 @@ def main():
 
     ##Debugging
     cashflows = generate_cashflow_schedule_gilts(maturity,coupon)
-    #print(cashflows)                                               #Debugging
-
-
+    print(cashflows)                                               #Debugging
+    accrued = calculate_accrued_actact(cashflows)
+    print(accrued)
 
 if __name__ == '__main__':
     main()
