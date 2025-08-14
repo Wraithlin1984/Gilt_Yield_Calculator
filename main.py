@@ -5,7 +5,7 @@ from datetime import datetime
 
 from modules.generate_cashflow_schedule_gilts import generate_cashflow_schedule_gilts
 from modules.calculate_accrued_coupon import calculate_accrued_actact
-
+from modules.calculate_yield_actact import calculate_yield_actact
 
 def validate_inputs(maturity_str: str, coupon_str: str, price_str: str):
     try:
@@ -31,9 +31,12 @@ def main():
     #coupon_str = input("Enter coupon rate (%): ")                                  #Reinstate me
     #price_str = input("Enter clean price (% of par): ")                            #Reinstate me
 
+    maturity_str = "31/01/2046"
+    coupon_str = "0.875"
+    price_str = "44.73"
+
     try:
-        #maturity, coupon, price = validate_inputs(maturity_str, coupon_str, price_str) #Reinstate me
-        maturity, coupon, price = validate_inputs("31/01/2046", "0.875", "45.11")           #Debugging/
+        maturity, coupon, price = validate_inputs(maturity_str, coupon_str, price_str) #Reinstate me
     except ValueError as err:
         print(err)
         return
@@ -42,7 +45,11 @@ def main():
     cashflows = generate_cashflow_schedule_gilts(maturity,coupon)
     print(cashflows)                                               #Debugging
     accrued = calculate_accrued_actact(cashflows)
-    print(accrued)
+    yield_actact = calculate_yield_actact(cashflows, price, accrued, 2, 1000, 1e-5)
+
+    print(f"Yield to maturity: {yield_actact*100: .2f}%")
+    print(f"Accrued interest: £{accrued: .3f} per £100")
+    print(f"Dirty price: £{price+accrued: .2f} = £{price: .2f} + £{accrued: .2f}")
 
 if __name__ == '__main__':
     main()

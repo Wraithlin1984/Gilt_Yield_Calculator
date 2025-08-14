@@ -1,6 +1,6 @@
 #Generate a date,payment cashflow schedule from today until maturity
 #vibecoding with CoPilot
-
+from calendar import weekday
 from datetime import datetime, timedelta
 import polars as pl
 import os
@@ -12,14 +12,25 @@ def generate_cashflow_schedule_gilts(maturity_date: datetime, coupon: float) -> 
 
     #Gilts have semi-annual cashflows
     current = maturity_date
-    step_days = [183,182]       #Alternating steps as 1 year is 365
-    step_index = 0
+    day = maturity_date.day
+    month = maturity_date.month
+    year = maturity_date.year
 
     #Generate pseudo payment dates from final maturity in reverse
     while current >= cutoff_date:
-            cashflow_dates.append(current)
-            current -= timedelta(days=step_days[step_index])
-            step_index = 1- step_index
+        #Bump weekends to the next Mondays
+        ## This should check for public holidays, but that requires a calendar
+        day_index = current.weekday()
+        if day_index >4:
+            current = current + timedelta(days=(7-day_index))
+
+        cashflow_dates.append(current)
+
+        #No fixed increment to the prior cashflow so calendar convention is most robust
+        if (month-6)<0:
+            year-= 1
+        month = (month - 6) % 12
+        current = datetime(year, month ,day)
     cashflow_dates.sort()       #Dates in chronological order
 
     #Generate payment amounts

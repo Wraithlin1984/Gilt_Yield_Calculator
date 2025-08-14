@@ -22,4 +22,7 @@ def calculate_accrued_actact(df: pl.DataFrame, today: datetime = None) -> float:
     fraction = (today-last).days/(next_-last).days
     accrued = last_cashflow*fraction
 
+    print(f"Days since last cashflow: {(today-last).days} days")
+    print(f"Days to next cashflow: {(next_-today).days} days")
+
     return round(accrued, 3)
