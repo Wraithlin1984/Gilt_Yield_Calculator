@@ -47,7 +47,7 @@ def main():
     accrued = calculate_accrued_actact(cashflows)
     yield_actact = calculate_yield_actact(cashflows, price, accrued, 2, 1000, 1e-5)
 
-    print(f"Yield to maturity: {yield_actact*100: .2f}%")
+    print(f"Yield to maturity: {yield_actact*100: .3f}%")
     print(f"Accrued interest: £{accrued: .3f} per £100")
     print(f"Dirty price: £{price+accrued: .2f} = £{price: .2f} + £{accrued: .2f}")
 

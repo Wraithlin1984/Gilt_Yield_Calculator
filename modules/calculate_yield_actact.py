@@ -49,7 +49,7 @@ def calculate_yield_actact(
     #calculate discount period (years)
     df = df.with_columns([
         pl.col('date').cast(pl.Datetime),
-        ((pl.col('date')- pl.lit(today)).dt.total_days()/365.25).alias('discount_period')
+        ((pl.col('date')- pl.lit(today)).dt.total_days()/365.25*coupon_freq).alias('discount_period')
      ])
     print(df)
 
@@ -59,7 +59,7 @@ def calculate_yield_actact(
     #Iterative solver (Newton-Rhapson fallback to bisection)
     def present_value(rate: float) -> float:
         return df.select (
-            (pl.col('cashflow')/(1+rate)**pl.col('discount_period')).sum()
+            (pl.col('cashflow')/(1+rate/coupon_freq)**pl.col('discount_period')).sum()
         ).item()
 
     #Bracket search
@@ -68,7 +68,7 @@ def calculate_yield_actact(
         mid = (low+high)/2
         pv = present_value(mid)
         if abs(pv-target_pv) < tolerance:
-            return round (mid,4)
+            return round (mid,5)
         if pv > target_pv:
             low = mid
         else:
