@@ -6,10 +6,7 @@ from pydoc import resolve
 
 import polars as pl
 from datetime import datetime
-from typing import Union
-
 from polars.polars import ColumnNotFoundError
-
 
 def calculate_yield_actact(
         df: pl.DataFrame,
@@ -23,11 +20,11 @@ def calculate_yield_actact(
     """
     Calculate the yield on a fixed income security using act/act
     Parameters:
-    - df:   Polars DataFrame with colums ['date','cashflow']
+    - df:   Polars DataFrame with columns ['date','cashflow']
     - clean_price: Market price
     - accrued: Accrued interest
     - coupon_freq: Coupon frequency
-    - max_iteractions: Maximum number of iterations for convergence
+    - max_iterations: Maximum number of iterations for convergence
     - tolerance: Tolerance for convergence
 
     Returns:
@@ -49,7 +46,7 @@ def calculate_yield_actact(
     #calculate discount period (years)
     df = df.with_columns([
         pl.col('date').cast(pl.Datetime),
-        ((pl.col('date')- pl.lit(today)).dt.total_days()/365.25*coupon_freq).alias('discount_period')
+        ((pl.col('date')- pl.lit(today)).dt.total_days()/365*coupon_freq).alias('discount_period')
      ])
     print(df)
 

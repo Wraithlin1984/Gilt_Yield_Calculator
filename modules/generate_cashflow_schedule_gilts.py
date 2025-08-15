@@ -19,17 +19,19 @@ def generate_cashflow_schedule_gilts(maturity_date: datetime, coupon: float) -> 
     #Generate pseudo payment dates from final maturity in reverse
     while current >= cutoff_date:
         #Bump weekends to the next Mondays
-        ## This should check for public holidays, but that requires a calendar
-        day_index = current.weekday()
-        if day_index >4:
-            current = current + timedelta(days=(7-day_index))
+        ## Apparently Act/Act doesn't use adjusted dates for non-working days
+        #day_index = current.weekday()
+        #if day_index >4:
+        #    current = current + timedelta(days=(7-day_index))
 
         cashflow_dates.append(current)
 
         #No fixed increment to the prior cashflow so calendar convention is most robust
-        if (month-6)<0:
+        if month<7:
             year-= 1
-        month = (month - 6) % 12
+            month += 6
+        else:
+            month -=6
         current = datetime(year, month ,day)
     cashflow_dates.sort()       #Dates in chronological order
 

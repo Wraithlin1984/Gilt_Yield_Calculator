@@ -13,7 +13,7 @@ def calculate_accrued_actact(df: pl.DataFrame, today: datetime = None) -> float:
     future = [d for d in dates if d > today]
 
     if not past  or not future:
-        raise ValueError("Cashflow Datafroma must contain a 'date' column with at least one date in the past and one in the future")
+        raise ValueError("Cashflow DataFrame must contain a 'date' column with at least one date in the past and one in the future")
 
     last = max(past)
     next_ = min(future)

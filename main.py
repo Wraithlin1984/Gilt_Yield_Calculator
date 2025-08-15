@@ -27,13 +27,14 @@ def validate_inputs(maturity_str: str, coupon_str: str, price_str: str):
         raise ValueError(f"Invalid input: {e}")
 
 def main():
-    #maturity_str = input("Enter maturity date (dd/mm/yyyy): ")                     #Reinstate me
-    #coupon_str = input("Enter coupon rate (%): ")                                  #Reinstate me
-    #price_str = input("Enter clean price (% of par): ")                            #Reinstate me
+    maturity_str = input("Enter maturity date (dd/mm/yyyy): ")                     #Reinstate me
+    coupon_str = input("Enter coupon rate (%): ")                                  #Reinstate me
+    price_str = input("Enter clean price (% of par): ")                            #Reinstate me
 
-    maturity_str = "31/01/2046"
-    coupon_str = "0.875"
-    price_str = "44.73"
+    ##TestValues
+    #maturity_str = "31/01/2046"
+    #coupon_str = "0.875"
+    #price_str = "44.73"
 
     try:
         maturity, coupon, price = validate_inputs(maturity_str, coupon_str, price_str) #Reinstate me
