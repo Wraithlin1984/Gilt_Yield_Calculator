@@ -1,23 +1,33 @@
-#calculate the accrued coupon from a cashflow schedule
+#Calculate the accrued coupon from a cashflow schedule
 #vibecoding with CoPilot
 
 from datetime import datetime
 import polars as pl
 
-def calculate_accrued_actact(df: pl.DataFrame, today: datetime = None) -> float:
+def calculate_accrued_actact(df: pl.DataFrame, today: datetime = None) -> tuple[float, float]:
+    """
+    Calculate the accrued coupon for a bond using the actual/actual convention.
+    pl.DataFrame contains ['date'] in chronological order
+    Optional today: Specify a transaction date
+    Returns: Accrued_amount and accrued_time (fraction of  a coupon)
+    """
+    if 'date' not in df.columns or 'cashflow' not in df.columns:
+        raise ValueError("Input DataFrame must contain 'date' and 'cashflow' columns")
     if today is None:
         today = datetime.today()
 
-    dates = df['date'].to_list()
-    past = [d for d in dates if d < today]
-    future = [d for d in dates if d > today]
+    past = df.filter(pl.col("date") <= today)
+    future = df.filter(pl.col("date") > today)
 
-    if not past  or not future:
-        raise ValueError("Cashflow DataFrame must contain a 'date' column with at least one date in the past and one in the future")
+    if past.is_empty() or future.is_empty():
+        raise ValueError("Cashflow DataFrame must contain dates both before and after 'Today'")
 
-    last = max(past)
-    next_ = min(future)
-    last_cashflow = df.filter(pl.col("date") == last)["cashflow"][0]
+    last = past.select(pl.col("date").max()).item()
+    next_ = future.select(pl.col("date").min()).item()
+    if (next_ - last).days <1:
+        raise ValueError("Invalid cashflow schedule: consecutive dates are identical")
+
+    last_cashflow = df.filter(pl.col("date") == last).select("cashflow").item()
 
     fraction = (today-last).days/(next_-last).days
     accrued = last_cashflow*fraction
