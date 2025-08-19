@@ -31,10 +31,10 @@ def main():
     coupon_str = input("Enter coupon rate (%): ")                                  #Reinstate me
     price_str = input("Enter clean price (% of par): ")                            #Reinstate me
 
-    ##TestValues
-    #maturity_str = "31/01/2046"
-    #coupon_str = "0.875"
-    #price_str = "44.73"
+    #TestValues
+    #maturity_str = "31/01/2046"                                     #Debugging
+    #coupon_str = "0.875"                                            #Debugging
+    #price_str = "43.88"                                             #Debugging
 
     try:
         maturity, coupon, price = validate_inputs(maturity_str, coupon_str, price_str) #Reinstate me
@@ -44,12 +44,13 @@ def main():
 
     ##Debugging
     cashflows = generate_cashflow_schedule_gilts(maturity,coupon)
-    accrued = calculate_accrued_actact(cashflows)
-    yield_actact = calculate_yield_actact(cashflows, price, accrued, 2, 1000, 1e-5)
+    accrued, fraction = calculate_accrued_actact(cashflows)
+    yield_actact = calculate_yield_actact(cashflows, price, accrued, (1-fraction), 2, 1000, 1e-5)
 
     print(f"Yield to maturity: {yield_actact*100: .3f}%")
     print(f"Accrued interest: £{accrued: .3f} per £100")
     print(f"Dirty price: £{price+accrued: .2f} = £{price: .2f} + £{accrued: .2f}")
+    #print(fraction)              #Debugging
 
 if __name__ == '__main__':
     main()

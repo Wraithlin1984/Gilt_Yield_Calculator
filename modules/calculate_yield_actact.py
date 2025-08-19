@@ -1,17 +1,17 @@
 #Calculate the yield on a fixed income instrument given the price and cashflow schedule
 #vibecoding with CoPilot
-from dbm import error
-from operator import itemgetter
-from pydoc import resolve
-
 import polars as pl
+import numpy as np
 from datetime import datetime
+
+from polars.ml.utilities import frame_to_numpy
 from polars.polars import ColumnNotFoundError
 
 def calculate_yield_actact(
         df: pl.DataFrame,
         clean_price: float,
         accrued: float,
+        fraction: float,
         coupon_freq: int =2,
         max_iterations: int =100,
         tolerance: float = 1e-4
@@ -23,6 +23,8 @@ def calculate_yield_actact(
     - df:   Polars DataFrame with columns ['date','cashflow']
     - clean_price: Market price
     - accrued: Accrued interest
+    - fraction: Fraction of period to next coupon
+    - the fractional period of the first coupon
     - coupon_freq: Coupon frequency
     - max_iterations: Maximum number of iterations for convergence
     - tolerance: Tolerance for convergence
@@ -43,12 +45,15 @@ def calculate_yield_actact(
     if df.is_empty():
         raise ValueError("There are no dates in the future")
 
-    #calculate discount period (years)
+    #calculate discount periods as periods (coupons)
+    period = fraction
+    np = df.shape[0]
+    discount_periods = [fraction + i for i in range(np)]
+
     df = df.with_columns([
         pl.col('date').cast(pl.Datetime),
-        ((pl.col('date')- pl.lit(today)).dt.total_days()/365*coupon_freq).alias('discount_period')
+        pl.Series('discount_period', discount_periods)
      ])
-    print(df)
 
     #Target present value
     target_pv = clean_price + accrued
@@ -60,7 +65,7 @@ def calculate_yield_actact(
         ).item()
 
     #Bracket search
-    low, high = 0.0, 0.2
+    low, high = 0.0, 1.0
     for _ in range(max_iterations):
         mid = (low+high)/2
         pv = present_value(mid)
