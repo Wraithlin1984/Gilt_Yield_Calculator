@@ -1,7 +1,9 @@
 #Generate a date,payment cashflow schedule from today until maturity
 #vibecoding with CoPilot
-from calendar import weekday
+
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
+
 import polars as pl
 import os
 
@@ -12,33 +14,20 @@ def generate_cashflow_schedule_gilts(maturity_date: datetime, coupon: float) -> 
 
     #Gilts have semi-annual cashflows
     current = maturity_date
-    day = maturity_date.day
-    month = maturity_date.month
-    year = maturity_date.year
 
-    #Generate pseudo payment dates from final maturity in reverse
+    #Generate pseudo payment dates from final maturity in reverse order
     while current >= cutoff_date:
-        #Bump weekends to the next Mondays
-        ## Apparently Act/Act doesn't use adjusted dates for non-working days
-        #day_index = current.weekday()
-        #if day_index >4:
-        #    current = current + timedelta(days=(7-day_index))
-
         cashflow_dates.append(current)
 
         #No fixed increment to the prior cashflow so calendar convention is most robust
-        if month<7:
-            year-= 1
-            month += 6
-        else:
-            month -=6
-        current = datetime(year, month ,day)
-    cashflow_dates.sort()       #Dates in chronological order
+        current -= relativedelta(months=6)
+    cashflow_dates.sort()       #Dates in chronological order. Generally faster than building in order with prepends
 
     #Generate payment amounts
+    if not cashflow_dates:
+            return  ValueError('Unknown error building cashflow schedule')
     cashflows = [coupon/2]*len(cashflow_dates)          #All gilts are semi-annual
-    if cashflows:
-        cashflows[-1] += 100
+    cashflows[-1] += 100                                #Add principal
 
     df = pl.DataFrame({
         'date':cashflow_dates,
@@ -47,11 +36,11 @@ def generate_cashflow_schedule_gilts(maturity_date: datetime, coupon: float) -> 
 
     #Save this down
     folder="Gilt_Schedules"
-    filename = f"UKT-{coupon: .4f}-{maturity_date.strftime('%m%Y')}.json"
+    filename = f"UKT-{coupon:.4f}-{maturity_date.strftime('%m%Y')}.json"
     filepath = os.path.join(folder, filename)
 
+    os.makedirs(folder, exist_ok=True)
     if not os.path.exists(filepath):
-        os.makedirs(folder, exist_ok=True)
         df.write_json(filepath)
 
     return df
